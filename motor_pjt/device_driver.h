@@ -6,6 +6,7 @@
 extern volatile unsigned int key_pressed_flag;
 extern unsigned int pwm_default;
 extern volatile unsigned int motor_dir;
+extern volatile unsigned int re_flag;
 
 // key_event.c
 

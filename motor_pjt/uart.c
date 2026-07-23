@@ -53,6 +53,21 @@ char Uart2_Get_Char(void)
 	return (char)USART2->DR;
 }
 
+void Uart2_RX_Interrupt_Enable(int en)
+{
+  if(en)
+  {
+    Macro_Set_Bit(USART2->CR1, 5);
+    NVIC_ClearPendingIRQ(38);
+    NVIC_EnableIRQ(38);
+  }
+  else
+  {
+    Macro_Clear_Bit(USART2->CR1, 5);
+    NVIC_DisableIRQ(38);
+  }
+}
+
 char Uart2_Get_Pressed(void)
 {
 	if(Macro_Check_Bit_Set(USART2->SR, 5))

@@ -16,6 +16,52 @@
 #define TIME5_PLS_OF_1ms			(1000/TIM5_TICK)
 
 
+void TIM2_Delay(int time)
+{
+	Macro_Set_Bit(RCC->APB1ENR, 0);
+
+	// TIM2 CR1 설정: down count, one pulse
+	TIM2->CR1 = (0x1<<4) | (0x1<<3);
+	// PSC 초기값 설정 => 20usec tick이 되도록 설계 (50KHz)
+	TIM2->PSC = (unsigned int)(TIMXCLK/TIM2_FREQ+0.5)-1;
+
+	unsigned int pls = TIM2_1ms_Pls * time;
+	int n = pls / TIM2_MAX;
+	int m = pls % TIM2_MAX;
+	int i;
+	
+	for(i=0; i<n; i++)
+	{
+		TIM2->ARR = TIM2_MAX;
+		Macro_Set_Bit(TIM2->EGR,0);
+		Macro_Clear_Bit(TIM2->SR, 0);
+		Macro_Set_Bit(TIM2->CR1, 0);
+		while (!Macro_Check_Bit_Set(TIM2->SR, 0));
+
+	}
+
+	// ARR 초기값 설정 => 요청한 time msec에 해당하는 초기값 설정
+	// 1ms 필요한 펄스수 * time
+	// 1/1000sec(1ms)만들기 = 20usec에 x 50 하면 됨 
+	TIM2->ARR = m;
+	
+	// UG 이벤트 발생
+	Macro_Set_Bit(TIM2->EGR, 0);
+	
+	// UIF(Update Interrupt Pending) Clear (수동으로 clear해야하는 flag는 clear 먼저 해야함)
+	Macro_Clear_Bit(TIM2->SR, 0);
+	
+	// TIM2 start
+	Macro_Set_Bit(TIM2->CR1, 0);
+
+	// Wait timeout
+	while (!Macro_Check_Bit_Set(TIM2->SR, 0));
+	Macro_Clear_Bit(TIM2->SR, 0);
+
+	// TIM2 Stop
+	Macro_Clear_Bit(TIM2->CR1, 0);
+}
+
 void TIM2_SW_Start(int time)
 {	
 	Macro_Set_Bit(RCC->APB1ENR, 0);						// TIM2EN
@@ -86,7 +132,7 @@ void TIM4_SW_Start(int time)
 
 }
 
-int TIM4_SW_T_CHK(void)
+int TIM4_Check_Timeout(void)
 {
 	// 타이머가 timeout 이면 1 리턴, 아니면 0 리턴
 	if (Macro_Check_Bit_Set(TIM4->SR, 0)){
@@ -101,50 +147,54 @@ void TIM4_SW_Stop(void)
 	Macro_Clear_Bit(TIM4->CR1, 0);
 }
 
+void TIM4_Change_Value(int time)
+{
+	TIM4->ARR = 50 * time;
+}
 void TIM5_Init(void)
 {
 	Macro_Set_Bit(RCC->AHB1ENR, 0);		// portA
 	Macro_Set_Bit(RCC->APB1ENR, 3);		// timer
 }
-void TIM5_CW(void)
+void TIM5_CW(void)					
 {
-    Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 0);      // PA0 => ALT(MODER -> 10: alternate function)
-    Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 0);     // PA0 => AF02
-    Macro_Write_Block(TIM5->CCMR1,0xff, 0x60, 0);
-    TIM5->CCER = (0<<1)|(1<<0);
+	Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 0);  	// PA0 => ALT(MODER -> 10: alternate function)
+	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 0); 	// PA0 => AF02
+	Macro_Write_Block(TIM5->CCMR1,0xff, 0x60, 0);
+	TIM5->CCER = (0<<1)|(1<<0);
 }
 
-void TIM5_CCW(void)
+void TIM5_CCW(void)					
 {
-    Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 2);       // PA1 => ALT(MODER -> 10: alternate function)
-    Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 4);  // PA1 => AF02
+	Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 2);  	 // PA1 => ALT(MODER -> 10: alternate function)
+	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 4);  // PA1 => AF02
 
-    Macro_Write_Block(TIM5->CCMR1,0xff, 0x60, 8);
-    TIM5->CCER = (0<<5)|(1<<4);
+	Macro_Write_Block(TIM5->CCMR1,0xff, 0x60, 8);
+	TIM5->CCER = (0<<5)|(1<<4);
 }
 
 void TIM5_Out_PWM(unsigned short freq, int duty)
 {
-    TIM5->CR1 = (0x1<<4);
-    // Timer 주파수가 TIM5_FREQ가 되도록 PSC 설정
-    TIM5->PSC = (unsigned int)(TIMXCLK/TIM5_FREQ+0.5)-1;
+	TIM5->CR1 = (0x1<<4);
+	// Timer 주파수가 TIM5_FREQ가 되도록 PSC 설정
+	TIM5->PSC = (unsigned int)(TIMXCLK/TIM5_FREQ+0.5)-1;
 
-    // 요청한 주파수가 되도록 ARR 설정
-    // TIM5->ARR = TIM5_FREQ / freq;
-    TIM5->ARR = (unsigned int)((double)TIM5_FREQ / freq + 0.5)-1;
+	// 요청한 주파수가 되도록 ARR 설정
+	// TIM5->ARR = TIM5_FREQ / freq;
+	TIM5->ARR = (unsigned int)((double)TIM5_FREQ / freq + 0.5)-1;
+	
 
-
-     if (!motor_dir) {
+	 if (!motor_dir) {
         TIM5->CCR1 = (TIM5->ARR) * ((double)duty / 100.);
     } else {
         TIM5->CCR2 = (TIM5->ARR) * ((double)duty / 100.);
     }
+	
+	// Manual Update(UG 발생)
+	Macro_Set_Bit(TIM5->EGR, 0);
 
-    // Manual Update(UG 발생)
-    Macro_Set_Bit(TIM5->EGR, 0);
-
-    // Down Counter, Repeat Mode, Timer Start
-    Macro_Set_Bit(TIM5->CR1, 0);
+	// Down Counter, Repeat Mode, Timer Start
+	Macro_Set_Bit(TIM5->CR1, 0);
 }
 
 void TIM5_Out_Stop(void)
