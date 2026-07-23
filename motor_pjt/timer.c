@@ -5,11 +5,11 @@
 #define TIM2_1ms_Pls	(TIM2_FREQ/1000.)		// 개
 #define TIM2_MAX 		(0xFFFFU)
 
-#define TIM4_TICK 		20 						// usec
-#define TIM4_FREQ		(1000000./TIM4_TICK) 	// hz
-#define TIM4_1ms_Pls	(TIM4_FREQ/1000.)		// 개
-#define TIM4_MAX 		(0xFFFFU)
-#define INIT_ARR 		(0xFFFFU)
+#define TIM4_TICK	  		(20) 				// usec
+#define TIM4_FREQ 	  		(1000000/TIM4_TICK) // Hz
+#define TIME4_PLS_OF_1ms  	(1000/TIM4_TICK)
+#define TIM4_MAX	  		(0xffffu)
+#define INIT_ARR 			(0xFFFFU)
 
 #define TIM5_FREQ					(8000000)			// Hz
 #define TIM5_TICK					(1000000/TIM5_FREQ)	// usec
@@ -60,6 +60,38 @@ void TIM2_Delay(int time)
 
 	// TIM2 Stop
 	Macro_Clear_Bit(TIM2->CR1, 0);
+}
+
+void TIM2_ISR_EN(int en, int time)
+{
+	if(en)
+	{
+		// TIM2 Clock On
+		Macro_Set_Bit(RCC->APB1ENR, 0);
+
+		TIM2->CR1 = (1<<4)|(1<<3);
+		TIM2->PSC = (unsigned int)(TIMXCLK/(double)TIM2_FREQ + 0.5)-1;
+		TIM2->ARR = TIM2_1ms_Pls * time;
+		Macro_Set_Bit(TIM2->EGR,0);
+
+		// TIM2 Pending Clear
+		Macro_Clear_Bit(TIM2->SR, 0);  
+		// NVIC Pending Clear
+		NVIC_ClearPendingIRQ(28);
+		// TIM4 Interrupt Enable
+		Macro_Set_Bit(TIM2->DIER, 0);
+		// NVIC Interrupt Enable
+		NVIC_EnableIRQ(28);
+		// TIM2 Start
+		Macro_Set_Bit(TIM2->CR1, 0);
+	}
+
+	else
+	{
+		NVIC_DisableIRQ(28);
+		Macro_Clear_Bit(TIM2->CR1, 0);
+		Macro_Clear_Bit(TIM2->DIER, 0);
+	}
 }
 
 void TIM2_SW_Start(int time)
@@ -119,7 +151,7 @@ void TIM4_SW_Start(int time)
 	TIM4->PSC = (unsigned int)(TIMXCLK/TIM4_FREQ+0.5)-1;
 
 	// ARR은 1ms 필요 펄스 * time
-	TIM4->ARR = TIM4_1ms_Pls * time;
+	TIM4->ARR = TIME4_PLS_OF_1ms * time;
 
 	// UG 이벤트 발생
 	Macro_Set_Bit(TIM4->EGR, 0);
@@ -132,7 +164,36 @@ void TIM4_SW_Start(int time)
 
 }
 
-int TIM4_Check_Timeout(void)
+void TIM4_ISR_Enable(int en, int time)
+{
+    if(en)
+    {
+        Macro_Set_Bit(RCC->APB1ENR, 2);
+
+        TIM4->CR1 = (1<<4)|(1<<3);
+        TIM4->PSC = (unsigned int)(TIMXCLK/(double)TIM4_FREQ + 0.5)-1;
+        TIM4->ARR = TIME4_PLS_OF_1ms * time;
+        Macro_Set_Bit(TIM4->EGR,0);
+
+        Macro_Clear_Bit(TIM4->SR, 0);
+        NVIC_ClearPendingIRQ(30);
+
+        Macro_Set_Bit(TIM4->DIER, 0);
+        NVIC_EnableIRQ(30);
+
+        Macro_Set_Bit(TIM4->CR1, 0);
+    }
+
+    else
+    {
+        NVIC_DisableIRQ(30);
+        Macro_Clear_Bit(TIM4->CR1, 0);
+        Macro_Clear_Bit(TIM4->DIER, 0);
+    }
+	}
+	
+
+int TIM4_SW_T_CHK(void)
 {
 	// 타이머가 timeout 이면 1 리턴, 아니면 0 리턴
 	if (Macro_Check_Bit_Set(TIM4->SR, 0)){
@@ -147,10 +208,8 @@ void TIM4_SW_Stop(void)
 	Macro_Clear_Bit(TIM4->CR1, 0);
 }
 
-void TIM4_Change_Value(int time)
-{
-	TIM4->ARR = 50 * time;
-}
+
+
 void TIM5_Init(void)
 {
 	Macro_Set_Bit(RCC->AHB1ENR, 0);		// portA

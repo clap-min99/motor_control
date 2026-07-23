@@ -9,8 +9,7 @@ void _Invalid_ISR(void)
 	for(;;);
 }
 
-#if 0
-extern volatile int Key_Pressed;
+
 
 void EXTI15_10_IRQHandler(void)
 {
@@ -18,20 +17,36 @@ void EXTI15_10_IRQHandler(void)
 	
 	EXTI->PR = 0x1 << 13;
 	NVIC_ClearPendingIRQ(40);
-	}
-	
-extern volatile int TIM4_Expired;
-void TIM4_IRQHandler(void)
+	TIM2_ISR_EN(1, 4000); 
+}
+
+
+
+void TIM2_IRQHandler(void)
 {
 	// TIM4 Interrupt Pending Clear
-	Macro_Clear_Bit(TIM4->SR, 0);  
+	Macro_Clear_Bit(TIM2->SR, 0);  
 	// NVIC Pending Clear
-	NVIC_ClearPendingIRQ(38);
-	TIM4_Expired = 1;
+	NVIC_ClearPendingIRQ(28);
+	TIM2_ISR_EN(0, 0);
+	if (Key_Get_Pressed())     // 3초 됐는데 아직 눌려있으면
+	{
+		key_3sec_flag = 1;
+	}
+	// TIM2_Expired = 1;
 }
-#endif
-extern volatile int Uart_Data_In;
-extern volatile unsigned char Uart_Data;
+
+
+
+void TIM4_IRQHandler(void)
+{
+    // TIM4 Interrupt Pending Clear
+    Macro_Clear_Bit(TIM4->SR, 0);
+    // NVIC Pending Clear
+    NVIC_ClearPendingIRQ(30);
+    TIM4_Expired = 1;
+
+}
 
 void USART2_IRQHandler(void)
 {
