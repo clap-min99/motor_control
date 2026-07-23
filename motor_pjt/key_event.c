@@ -1,6 +1,6 @@
 #include "device_driver.h"
 #include <stdio.h>
-
+#if 0
 void Get_Pressed_Check(void) 
 {
     if (!key_pressed_flag)
@@ -45,3 +45,4 @@ void Get_Pressed_Check(void)
         }
     }
 }
+#endif

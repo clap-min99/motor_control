@@ -1,6 +1,6 @@
 #include "device_driver.h"
 
-void Motor_CW(void)
+void Motor_CW(int gear)
 {
     #if 0
     Motor_Stop();
@@ -16,12 +16,12 @@ void Motor_CW(void)
     TIM5_CW();   
     Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 2);
 	Macro_Clear_Bit(GPIOA->ODR, 1);
-    TIM5_Out_PWM(10000, pwm_default);
+    TIM5_Out_PWM(10000, pwm_default+(gear-1)*5);
     #endif
     
 }
 
-void Motor_CCW(void)
+void Motor_CCW(int gear)
 {
     #if 0
     Motor_Stop();
@@ -38,7 +38,7 @@ void Motor_CCW(void)
     TIM5_CCW();
     Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 0);
     Macro_Clear_Bit(GPIOA->ODR, 0);   
-	TIM5_Out_PWM(10000, pwm_default);
+	TIM5_Out_PWM(10000, pwm_default+(gear-1)*5);
     #endif
     
 }

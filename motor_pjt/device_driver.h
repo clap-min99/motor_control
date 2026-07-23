@@ -18,6 +18,7 @@ extern void Uart2_Init(int baud);
 extern void Uart2_Send_Byte(char data);
 extern char Uart2_Get_Char(void);
 extern char Uart2_Get_Pressed(void);
+extern void Uart2_RX_Interrupt_Enable(int en);
 
 // SysTick.c
 
@@ -39,8 +40,8 @@ extern void Key_Poll_Init(void);
 extern int Key_Get_Pressed(void);
 
 // motor.c
-extern void Motor_CW(void);
-extern void Motor_CCW(void);
+extern void Motor_CW(int gear);
+extern void Motor_CCW(int gear);
 extern void Motor_Stop(void);
 
 // timer.c

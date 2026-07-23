@@ -36,7 +36,7 @@ extern volatile unsigned char Uart_Data;
 void USART2_IRQHandler(void)
 {
 	Uart_Data = (unsigned char)USART2->DR;
-	TIM5_Out_PWM(10000, pwm_default+(((Uart_Data-'0')-1)*5));
+	Uart2_Send_Byte(Uart_Data);
 	Uart_Data_In = 1;
 	NVIC_ClearPendingIRQ(38);
 }

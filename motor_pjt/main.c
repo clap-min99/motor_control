@@ -29,20 +29,23 @@ void Main(void)
     Sys_Init(115200);
     Macro_Set_Bit(RCC->AHB1ENR, 0);
     Macro_Set_Bit(RCC->AHB1ENR, 2); 
+	Uart2_RX_Interrupt_Enable(1);
 
     printf("PWM Motor Start\n");
     
     for(;;)
     {
-
-        Get_Pressed_Check();
-
+		
+		
 		if(Uart_Data_In)
 		{
-			TIM5_Out_PWM(10000, pwm_default+(((Uart_Data-'0')-1)*5));
+				
+			Motor_CW(Uart_Data-'0');
 			printf("Motor gear box = %c\n", Uart_Data);
 			Uart_Data_In = 0;
 		}	
+        
+		// Get_Pressed_Check();
     
     }
 }
