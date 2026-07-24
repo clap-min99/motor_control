@@ -1,3 +1,4 @@
+Markdown
 <div align="center">
 
 <br><br><br>
@@ -11,6 +12,7 @@
 **High-Level Design Document**
 
 <br><br><br><br><br>
+
 | | |
 |---|---|
 | **버전** | v2.3 |
@@ -21,20 +23,22 @@
 
 </div>
 
-## 목차
-
-1. State
-
-    1.1 Operation Diagram
-
-    1.2 State Diagram
-
-2. Peripheral
-3. Function
+<!-- 표지 종료 후 페이지 나누기 -->
 <div style="page-break-after: always;"></div>
 
----
+## 목차
 
+### 1. [State](#1-state)
+    
+  - 1.1 [Operation Diagram](#11-operation-diagram)
+    
+  - 1.2 [State Diagram](#12-state-diagram)
+### 2. [Peripheral](#2-peripheral)
+### 3. [Function](#3-function)
+### 4. [Variable](#4-variable)
+
+
+---
 ### 모터 제어 프로젝트 상위설계서
 ### 1.State
   - #### 1.1 Operation Diagram
@@ -130,7 +134,7 @@
     | Key_Handler | unsigned int time_cnt | key 눌렀을 때 동작 |
     | Uart_Handler | void | void | uart data 받을 때 동작 |
 
-### 4. 변수
+### 4. Variable
 
   - #### 4-1. 전역변수
  
