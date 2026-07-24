@@ -1,45 +1,23 @@
 #include "device_driver.h"
-
+#define PWM_DEFAULT 50
 void Motor_CW(int gear)
 {
-    #if 0
     Motor_Stop();
-    if(Macro_Check_Bit_Set(TIM4->SR,0)){
-        TIM5_CW();   
-        Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 2);
-	    Macro_Clear_Bit(GPIOA->ODR, 1);
-        TIM5_Out_PWM(10000, pwm_default);
-    }
-    #endif
-
-    #if 1
-    TIM5_CW();   
+    TIM3_Delay(500);
     Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 2);
 	Macro_Clear_Bit(GPIOA->ODR, 1);
-    TIM5_Out_PWM(10000, pwm_default+(gear-1)*5);
-    #endif
-    
+    TIM5_CW_PWM(10000, PWM_DEFAULT+(gear-1)*5);
+   
 }
 
 void Motor_CCW(int gear)
 {
-    #if 0
+  
     Motor_Stop();
-    if(Macro_Check_Bit_Set(TIM4->SR,0)){
-        TIM5_CCW();
-        Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 0);
-        Macro_Clear_Bit(GPIOA->ODR, 0);   
-	    TIM5_Out_PWM(10000, pwm_default);
-    }
-    #endif
-    #if 1
-    Motor_Stop();
-    TIM2_Delay(1000);
-    TIM5_CCW();
+    TIM3_Delay(500);
     Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 0);
     Macro_Clear_Bit(GPIOA->ODR, 0);   
-	TIM5_Out_PWM(10000, pwm_default+(gear-1)*5);
-    #endif
+	TIM5_CCW_PWM(10000, PWM_DEFAULT+(gear-1)*5);
     
 }
 

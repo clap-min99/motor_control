@@ -10,32 +10,29 @@ void _Invalid_ISR(void)
 }
 
 
-
 void EXTI15_10_IRQHandler(void)
 {
-	Key_Pressed = 1;
-	
-	EXTI->PR = 0x1 << 13;
-	NVIC_ClearPendingIRQ(40);
-	TIM2_ISR_EN(1, 4000); 
+    if(!(GPIOC->IDR >> 13))
+    {
+        Key_Pressed = 1;
+    }
+    else
+    {
+        Key_Pressed = 2;
+    }
+    EXTI->PR = 0x1 << 13;
+    NVIC_ClearPendingIRQ(40);
 }
-
 
 
 void TIM2_IRQHandler(void)
 {
-	// TIM4 Interrupt Pending Clear
-	Macro_Clear_Bit(TIM2->SR, 0);  
-	// NVIC Pending Clear
-	NVIC_ClearPendingIRQ(28);
-	TIM2_ISR_EN(0, 0);
-	if (Key_Get_Pressed())     // 3초 됐는데 아직 눌려있으면
-	{
-		key_3sec_flag = 1;
-	}
-	// TIM2_Expired = 1;
+    time_cnt++;
+    // TIM2 Interrupt Pending Clear
+    Macro_Clear_Bit(TIM2->SR, 0);
+    // NVIC Pending Clear
+    //NVIC_ClearPendingIRQ(28);
 }
-
 
 
 void TIM4_IRQHandler(void)
