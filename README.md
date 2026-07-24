@@ -1,17 +1,55 @@
-#
+<div align="center">
+
+<br><br><br>
+
+# 모터 제어 프로젝트
+
+## 상위설계서
+
+<br>
+
+**High-Level Design Document**
+
+<br><br><br><br><br>
+| | |
+|---|---|
+| **문서번호** | HLD-MOTOR-001 |
+| **버전** | v1.0 |
+| **작성자** | 권민지 박수민 현수근 |
+| **작성일** | 2026-07-24 |
+| **팀** | AI시스템반도체SW개발_2기_4팀 |
+| **git** | 
+
+</div>
+
+## 목차
+
+1. State
+
+    1.1 Operation Diagram
+
+    1.2 State Diagram
+
+2. Peripheral
+3. Function
+<div style="page-break-after: always;"></div>
+
+---
+
 ### 모터 제어 프로젝트 상위설계서
 ### 1.State
   - #### 1.1 Operation Diagram
     - #### 1.1.1 Operation
+        <img src="./assets/op_diagram.png" width="500">
 
         | op_handler | event_handler |
         |---------------------|---------------------|
         | <b>gear_set</b><ul><li>gear default: 50 + 5 × n (n = 1~9)</li></ul><b>motor_state_set</b><ul><li>state_set: stop, forward, end<ul><li>one_clk: CW (default), CCW</li><li>double_clk: STOP (prv_motor_state)</li><li>long_clk: END (set default)</li></ul></li></ul> |<b>uart</b><ul><li>n (n = gear)</li></ul><b>key_handle</b><ul><li>set Key_Pressed</li></ul><b>TIMER_Event</b><ul><li>TIMER2 cnt</li><li>TIMER5 cnt</li><li>TIMER3 Delay</li></ul> | 
 
   - #### 1.2 State Diagram
-  
-
+    
     - #### 1.2.1 State
+        <img src="./assets/state_diagram.png" width="500">
   
         | **STATE** | **DESCRIPTION** | **EVENT** |
         |---|---|---|
@@ -85,7 +123,24 @@
     | LED_On | void | void | LD2 On |
     | LED_On | void | void | LD2 Off |
 
-  - #### 3.7 
+  - #### 3.7 operation.c
 
     | **FUNCTION NAME** | **PARAMETER** | **RETURN VALUE** | **DESCRIPTION** |
     |:----------:|:---:|:-----------:|:-----------:|
+    | Op_Handler | void | void | - |
+    | Key_Handler | unsigned int time_cnt | key 눌렀을 때 동작 |
+    | Uart_Handler | void | void | uart data 받을 때 동작 |
+
+### 4. 변수
+
+  - #### 4-1. 전역변수
+ 
+    | GLOBAL | data type | DESCRIPTION |
+    |:----------:|:-----------:|:-----------:|
+    | motor_state | volatile unsigned int | 동작 상태 |
+    | motor_dir | volatile unsigned int | 모터 방향(0: 정회전, 1: 역회전) |
+    | time_cnt | volatile unsigned int | time | 
+    | Uart_data_in| volatile unsigned int|uart 데이터 입력 체크| 
+    |motor_speed|volatile int| |
+    |gear|volatile unsigned int|PWM 속도 전달|
+    |Key_Pressed| volatile unsigned int| 0:X, 1:key press, 2:key release|

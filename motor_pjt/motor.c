@@ -1,5 +1,5 @@
 #include "device_driver.h"
-#define PWM_DEFAULT 50
+#define PWM_DEFAULT 60
 void Motor_CW(int gear)
 {
     Motor_Stop();

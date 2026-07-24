@@ -14,7 +14,7 @@ static unsigned release_time = 0;     // 뗀 시간
 static int      click_cnt    = 0;     // 
 
 
-void op_handler(void)
+void Op_Handler(void)
 {
     unsigned int now = time_cnt;
     Key_Handler(now);

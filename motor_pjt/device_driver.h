@@ -15,9 +15,6 @@ extern volatile unsigned int time_cnt;
 extern volatile int motor_state;
 extern volatile int gear;
 
-// key_event.c
-
-extern void Get_Pressed_Check(void); 
 
 // Uart.c
 
@@ -79,6 +76,6 @@ extern void TIM4_IRQHandler(void);
 extern void USART2_IRQHandler(void);
 
 //operation.c
-extern void op_handler(void);
+extern void Op_Handler(void);
 extern void Uart_Handler(void);
 extern void Key_Handler(unsigned int time_cnt);
